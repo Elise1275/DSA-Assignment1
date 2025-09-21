@@ -1,0 +1,228 @@
+syntax = "proto3";
+
+package carrentalsystem;
+
+// Service definition for Car Rental System
+service CarRentalService {
+    // Admin operations
+    rpc AddCar(AddCarRequest) returns (AddCarResponse);
+    rpc CreateUsers(stream CreateUserRequest) returns (CreateUsersResponse);
+    rpc UpdateCar(UpdateCarRequest) returns (UpdateCarResponse);
+    rpc RemoveCar(RemoveCarRequest) returns (RemoveCarResponse);
+    rpc ListAllReservations(ListReservationsRequest) returns (stream ReservationDetails);
+    
+    // Customer operations
+    rpc ListAvailableCars(ListAvailableCarsRequest) returns (stream Car);
+    rpc SearchCar(SearchCarRequest) returns (SearchCarResponse);
+    rpc AddToCart(AddToCartRequest) returns (AddToCartResponse);
+    rpc PlaceReservation(PlaceReservationRequest) returns (PlaceReservationResponse);
+    
+    // Common operations
+    rpc GetUserProfile(GetUserProfileRequest) returns (GetUserProfileResponse);
+    rpc ViewCart(ViewCartRequest) returns (ViewCartResponse);
+}
+
+// Enums
+enum CarStatus {
+    AVAILABLE = 0;
+    UNAVAILABLE = 1;
+    UNDER_MAINTENANCE = 2;
+    RENTED = 3;
+}
+
+enum UserRole {
+    CUSTOMER = 0;
+    ADMIN = 1;
+}
+
+enum ReservationStatus {
+    PENDING = 0;
+    CONFIRMED = 1;
+    COMPLETED = 2;
+    CANCELLED = 3;
+}
+
+// Core data structures
+message Car {
+    string plate = 1;
+    string make = 2;
+    string model = 3;
+    int32 year = 4;
+    double daily_price = 5;
+    int32 mileage = 6;
+    CarStatus status = 7;
+    string color = 8;
+    string fuel_type = 9;
+    int32 seating_capacity = 10;
+    string transmission = 11;
+    repeated string features = 12;
+    string location = 13;
+    int64 created_timestamp = 14;
+    int64 last_updated = 15;
+}
+
+message User {
+    string user_id = 1;
+    string username = 2;
+    string email = 3;
+    string phone = 4;
+    UserRole role = 5;
+    string full_name = 6;
+    string address = 7;
+    string license_number = 8;
+    int64 created_timestamp = 9;
+    bool is_active = 10;
+}
+
+message CartItem {
+    string plate = 1;
+    string start_date = 2;  // Format: YYYY-MM-DD
+    string end_date = 3;    // Format: YYYY-MM-DD
+    double estimated_price = 4;
+    int32 rental_days = 5;
+    int64 added_timestamp = 6;
+}
+
+message ReservationDetails {
+    string reservation_id = 1;
+    string user_id = 2;
+    string plate = 3;
+    string start_date = 4;
+    string end_date = 5;
+    double total_price = 6;
+    int32 rental_days = 7;
+    ReservationStatus status = 8;
+    int64 created_timestamp = 9;
+    int64 last_updated = 10;
+    string customer_name = 11;
+    string customer_email = 12;
+    Car car_details = 13;
+}
+
+// Request/Response messages
+
+// Admin operations
+message AddCarRequest {
+    string admin_user_id = 1;
+    Car car = 2;
+}
+
+message AddCarResponse {
+    bool success = 1;
+    string message = 2;
+    string car_id = 3;  // The plate number
+}
+
+message CreateUserRequest {
+    User user = 1;
+}
+
+message CreateUsersResponse {
+    bool success = 1;
+    string message = 2;
+    int32 users_created = 3;
+    repeated string failed_user_ids = 4;
+}
+
+message UpdateCarRequest {
+    string admin_user_id = 1;
+    string plate = 2;
+    Car updated_car = 3;
+}
+
+message UpdateCarResponse {
+    bool success = 1;
+    string message = 2;
+    Car updated_car = 3;
+}
+
+message RemoveCarRequest {
+    string admin_user_id = 1;
+    string plate = 2;
+}
+
+message RemoveCarResponse {
+    bool success = 1;
+    string message = 2;
+    repeated Car remaining_cars = 3;
+}
+
+message ListReservationsRequest {
+    string admin_user_id = 1;
+    string filter_status = 2;  // Optional filter by status
+    string filter_date = 3;    // Optional filter by date
+}
+
+// Customer operations
+message ListAvailableCarsRequest {
+    string user_id = 1;
+    string filter_text = 2;  // Optional filter (make, model, etc.)
+    int32 filter_year = 3;   // Optional year filter
+    double max_price = 4;    // Optional price filter
+    string location = 5;     // Optional location filter
+}
+
+message SearchCarRequest {
+    string user_id = 1;
+    string plate = 2;
+}
+
+message SearchCarResponse {
+    bool found = 1;
+    bool available = 2;
+    Car car = 3;
+    string message = 4;
+    repeated string unavailable_dates = 5;  // Dates when car is not available
+}
+
+message AddToCartRequest {
+    string user_id = 1;
+    string plate = 2;
+    string start_date = 3;
+    string end_date = 4;
+}
+
+message AddToCartResponse {
+    bool success = 1;
+    string message = 2;
+    CartItem cart_item = 3;
+    int32 cart_size = 4;
+}
+
+message PlaceReservationRequest {
+    string user_id = 1;
+    string payment_method = 2;
+    string special_requests = 3;
+}
+
+message PlaceReservationResponse {
+    bool success = 1;
+    string message = 2;
+    repeated ReservationDetails reservations = 3;
+    double total_amount = 4;
+    string confirmation_number = 5;
+}
+
+// Common operations
+message GetUserProfileRequest {
+    string user_id = 1;
+}
+
+message GetUserProfileResponse {
+    bool success = 1;
+    User user = 2;
+    string message = 3;
+    repeated ReservationDetails recent_reservations = 4;
+}
+
+message ViewCartRequest {
+    string user_id = 1;
+}
+
+message ViewCartResponse {
+    bool success = 1;
+    repeated CartItem cart_items = 2;
+    double total_estimated_price = 3;
+    int32 total_items = 4;
+    string message = 5;
+} 
