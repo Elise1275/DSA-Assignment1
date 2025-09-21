@@ -1,4 +1,4 @@
-// client.bal
+// client.bal 
 import ballerina/http;
 import ballerina/io;
 
@@ -191,5 +191,5 @@ public function testAssetManagementSystem() returns error? {
         }
     }
 
-    io:println("\n=== Demo completed successfully! ===");
+    io:println("\n=== Demo completed successfully!! ===");
 }
